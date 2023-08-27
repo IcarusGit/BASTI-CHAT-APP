@@ -22,16 +22,16 @@
         
     </div>
 
-    <!-- parent greenbg-->
+    <!-- parent -->
     <div class="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
-        
-        <div class="p-8 w-[900px] h-[800px] shadow rounded-lg overflow-hidden bg-green-500"> 
+        <!-- green bg -->
+        <div class="p-8 w-[900px] h-[90vh] shadow rounded-lg overflow-hidden bg-green-500"> 
             <div class="text-4xl text-white mb-2">
                 {{username}}
             </div> 
             <!-- child -->
-            <div class="border-white border max-h-[650px] overflow-auto">
-                <div v-for="(message, index) in messages_container" :key="index" class="h-full">
+            <div class="border-white border h-5/6 overflow-auto">
+                <div v-for="(message, index) in messages_container" :key="index" class="h-auto">
                     <div>
                         <div :class="`${index % 2 == 0 ? 'border-zinc-500 bg-white text-black' : 'border-white bg-zinc-500 text-white'}`"  class="flex justify-center items-center my-1 h-10">
                             {{ message }}

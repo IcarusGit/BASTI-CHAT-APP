@@ -12,6 +12,39 @@
             username: "icarus",
             password: "icarus"
         },
+        {
+            username: "icarus",
+            password: "icarus"
+        },
+        {
+            username: "icarus",
+            password: "icarus"
+        },
+        {
+            username: "icarus",
+            password: "icarus"
+        },
+        {
+            username: "icarus",
+            password: "icarus"
+        },
+        {
+            username: "icarus",
+            password: "icarus"
+        },
+        {
+            username: "icarus",
+            password: "icarus"
+        },
+        {
+            username: "icarus",
+            password: "icarus"
+        },
+        {
+            username: "icarus",
+            password: "icarus"
+        }
+
     ])
 
     function chatUser(username){
@@ -26,7 +59,7 @@
     </div>
 
     <div class="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
-        <div class="p-10 w-[900px] h-[800px] shadow rounded-lg overflow-hidden bg-green-500">
+        <div class="p-10 w-[900px] h-[90vh] shadow rounded-lg overflow-hidden bg-green-500">
             <div>
                 <div class="text-4xl text-white mb-4">MESSAGES</div>
                 
@@ -42,21 +75,24 @@
                 </div>                
             </form>
 
-            <div @click="chatUser(user.username)" v-for="(user, userindex) in users_list" :key="userindex">
-                <button class="flex items-center w-full border border-white rounded h-10 bg-zinc-500 text-white text-lg text-center py-1 my-1">
-                    <!-- avatar -->
-                    <div class="flex items-center text-center">
-                        <div class="flex items-center justify-center ml-2 rounded-full bg-orange-300 w-6 h-6 text-center" >
-                            <span>{{ user.username.charAt(0) }}</span>
+            <div class="border-white border h-4/5 overflow-auto">
+                <div @click="chatUser(user.username)" v-for="(user, userindex) in users_list" :key="userindex">
+                    <button class="flex items-center w-full border border-white rounded h-10 bg-zinc-500 text-white text-lg text-center py-1 my-1">
+                        <!-- avatar -->
+                        <div class="flex items-center text-center">
+                            <div class="flex items-center justify-center ml-2 rounded-full bg-orange-300 w-6 h-6 text-center" >
+                                <span>{{ user.username.charAt(0) }}</span>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- username -->
-                    <div class="mx-3">
-                        {{user.username}}
-                    </div>
-                </button>                
+                        
+                        <!-- username -->
+                        <div class="mx-3">
+                            {{user.username}}
+                        </div>
+                    </button>                
+                </div>
             </div>
+            
         </div>
     </div>
 </template>
