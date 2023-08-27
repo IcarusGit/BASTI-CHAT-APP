@@ -2,49 +2,24 @@
     const users_list = ref([
         {
             username: "sebastian",
-            password: "sebastian"
+            password: "sebastian",
+            isActive: true
         },
         {
             username: "Baste",
-            password: "Baste"
+            password: "Baste",
+            isActive: true
         },
         {
-            username: "icarus",
-            password: "icarus"
+            username: "zeb",
+            password: "zeb",
+            isActive: true
         },
         {
-            username: "icarus",
-            password: "icarus"
-        },
-        {
-            username: "icarus",
-            password: "icarus"
-        },
-        {
-            username: "icarus",
-            password: "icarus"
-        },
-        {
-            username: "icarus",
-            password: "icarus"
-        },
-        {
-            username: "icarus",
-            password: "icarus"
-        },
-        {
-            username: "icarus",
-            password: "icarus"
-        },
-        {
-            username: "icarus",
-            password: "icarus"
-        },
-        {
-            username: "icarus",
-            password: "icarus"
+            username: "huy",
+            password: "huy",
+            isActive: false
         }
-
     ])
 
     function chatUser(username){
@@ -75,19 +50,27 @@
                 </div>                
             </form>
 
+    
             <div class="border-white border h-4/5 overflow-auto">
                 <div @click="chatUser(user.username)" v-for="(user, userindex) in users_list" :key="userindex">
-                    <button class="flex items-center w-full border border-white rounded h-10 bg-zinc-500 text-white text-lg text-center py-1 my-1">
-                        <!-- avatar -->
-                        <div class="flex items-center text-center">
-                            <div class="flex items-center justify-center ml-2 rounded-full bg-orange-300 w-6 h-6 text-center" >
-                                <span>{{ user.username.charAt(0) }}</span>
+                    <button class="flex justify-between items-center w-full border border-white rounded h-10 bg-zinc-500 text-white text-lg text-center py-1 my-1">
+                        <div class="flex items-center">
+                            <!-- avatar -->
+                            <div class="flex items-center text-center">
+                                <div class="flex items-center justify-center ml-4 rounded-full bg-orange-300 w-6 h-6 text-center" >
+                                    <span>{{ user.username.charAt(0) }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- username -->
+                            <div class="mx-3">
+                                {{user.username}}
                             </div>
                         </div>
                         
-                        <!-- username -->
-                        <div class="mx-3">
-                            {{user.username}}
+                        <!-- active status -->
+                        <div :class="`${user.isActive ? 'bg-green-500': 'bg-red-500'}`" class="rounded-full w-6 h-6 mr-4">
+
                         </div>
                     </button>                
                 </div>
