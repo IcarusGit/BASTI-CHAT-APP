@@ -1,5 +1,23 @@
 <script setup>
+    const users_list = ref([
+        {
+            username: "sebastian",
+            password: "sebastian"
+        },
+        {
+            username: "Baste",
+            password: "Baste"
+        },
+        {
+            username: "icarus",
+            password: "icarus"
+        },
+    ])
 
+    function chatUser(username){
+        const router = useRouter(); 
+        router.replace(`/chat/${username}`); 
+    }
 </script>
 
 <template>
@@ -24,8 +42,20 @@
                 </div>                
             </form>
 
-            <div>
-                <div class="border border-white rounded h-10 bg-zinc-500 text-white text-lg text-center py-1">JUAN DELA CRUZ</div>
+            <div @click="chatUser(user.username)" v-for="(user, userindex) in users_list" :key="userindex">
+                <button class="flex items-center w-full border border-white rounded h-10 bg-zinc-500 text-white text-lg text-center py-1 my-1">
+                    <!-- avatar -->
+                    <div class="flex items-center text-center">
+                        <div class="flex items-center justify-center ml-2 rounded-full bg-orange-300 w-6 h-6 text-center" >
+                            <span>{{ user.username.charAt(0) }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- username -->
+                    <div class="mx-3">
+                        {{user.username}}
+                    </div>
+                </button>                
             </div>
         </div>
     </div>
