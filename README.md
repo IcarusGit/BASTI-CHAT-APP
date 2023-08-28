@@ -61,4 +61,8 @@ yarn preview
 ```
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
-PRACTICE FOR PULL REQUEST
+PRACTICE FOR PULL REQUEST to fix 
+
+
+
+try for the 1 commit behind
