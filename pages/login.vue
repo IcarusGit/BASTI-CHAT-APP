@@ -54,6 +54,12 @@
                     <button type="submit" value="Submit" class="rounded w-24 h-16 bg-green-500 mx-2 text-lg text-white">
                         Login
                     </button>
+
+                    <div class="text-md text-blue-600 flex justify-center items-center">
+                        <NuxtLink to="/" class="hover:border-black hover:opacity-50">
+                            Make an account
+                        </NuxtLink>
+                    </div>
                 </div>
             </form>
         </div>

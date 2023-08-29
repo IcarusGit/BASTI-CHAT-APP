@@ -12,25 +12,35 @@ import axios from 'axios';
     })
 
     const message = ref({
-        content: ""
+        content: "",
+        sender: ""
     })
 
     const container = ref(null); // Reference to the chat container element
 
-    async function sendMessage(){
-        axios.post(`http://localhost:3002/chat/${username}`,{content: message.value.content}).then(res => {
-            console.log(res.data.messages)
-            messages_container.value = res.data.messages
+    function sendMessage(){        
+        axios.post(`http://localhost:3002/chat/${username}`,{content: message.value.content}).then(async res => {
+            console.log(res.data.result)
+            messages_container.value.push({
+                content: res.data.content,
+                sender: res.data.sender
+            })
+            //messages_container.value = res.data.messages       
 
-            message.value.content = ""            
-        })   
+            await nextTick();//Use await nextTick() before scrolling to ensure the DOM update is complete, await need an async function
+            //to scroll when messages are overflowing
+            container.value.scrollTo({
+                top: container.value.scrollHeight,
+                behavior: 'smooth'
+            })           
+        })
+        message.value.content = ""   
+        message.value.sender = ""
+    }
 
-        await nextTick();//Use await nextTick() before scrolling to ensure the DOM update is complete, await need an async function
-        //to scroll when messages are overflowing
-        container.value.scrollTo({
-            top: container.value.scrollHeight,
-            behavior: 'smooth'
-        })     
+    function goBack(){
+        const router = useRouter(); 
+        router.push('/chat'); 
     }
 </script>
 
@@ -43,9 +53,22 @@ import axios from 'axios';
     <div class="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
         <!-- green bg -->
         <div class="flex flex-col p-8 w-[80vh] h-[90vh] shadow rounded-lg overflow-hidden bg-green-500"> 
-            <div class="text-4xl text-white">
-                {{ username }}
-            </div> 
+            <div class="flex justify-between">
+                <div class="text-4xl text-white">
+                    {{ username }}
+                </div> 
+
+                <div class="flex justify-end">
+                    <button @click="goBack" class="text-black bg-yellow-500 rounded-md h-11 w-20">
+                        GO BACK
+                    </button>
+
+                    <button class="text-white bg-red-500 rounded-md h-11 w-20">
+                        LOGOUT
+                    </button>
+                </div>
+            </div>
+            
             <!-- child -->
             <div class="flex flex-col border-white border h-5/6 overflow-auto my-4" ref="container">
                 <div v-for="(messages, index) in messages_container" :key="index" class="flex mx-4 my-2" :class="`${messages.sender_username == username ? 'justify-start' : 'justify-end'}`">
