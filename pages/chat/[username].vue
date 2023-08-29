@@ -8,13 +8,22 @@
         sender_username: username
     })
 
-    function sendMessage(){
+    const container = ref(null); // Reference to the chat container element
+
+    async function sendMessage(){
         messages_container.value.push({
             content: message.value.content,
             sender_username: message.value.sender_username
         })
 
         message.value.content = ""
+
+        await nextTick();//Use await nextTick() before scrolling to ensure the DOM update is complete, await need an async function
+
+        container.value.scrollTo({
+            top: container.value.scrollHeight,
+            behavior: 'smooth'
+        })
     }
 </script>
 
@@ -26,18 +35,20 @@
     <!-- parent -->
     <div class="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
         <!-- green bg -->
-        <div class="flex flex-col p-8 w-[900px] h-[90vh] shadow rounded-lg overflow-hidden bg-green-500"> 
+        <div class="flex flex-col p-8 w-[80vh] h-[90vh] shadow rounded-lg overflow-hidden bg-green-500"> 
             <div class="text-4xl text-white">
                 {{ username }}
             </div> 
             <!-- child -->
-            <div class="border-white border h-5/6 overflow-auto my-4">
-                <div v-for="(messages, index) in messages_container" :key="index" class="h-auto">
-                    <div>
-                        <div :class="`${messages.sender_username === username ? 'border-white bg-zinc-500 text-white' : 'border-zinc-500 bg-white text-black'}`" class="flex justify-center items-center my-1 h-10">
-                            {{ messages.content }}
-                        </div>
-                    </div>
+            <div class="flex flex-col border-white border h-5/6 overflow-auto my-4" ref="container">
+                <div v-for="(messages, index) in messages_container" :key="index" class="flex mx-4 my-2" :class="`${messages.sender_username == username ? 'justify-start' : 'justify-end'}`">
+                    <!-- container -->
+                    <div :class="`${messages.sender_username == username ? 'bg-zinc-500 text-white' : 'bg-white text-black'}`" class="rounded-lg px-2 h-auto max-w-[70%]">
+                        <p class="break-words">
+                            {{messages.content}}
+                        </p>
+                        
+                    </div>                    
                 </div>                              
             </div>    
 
