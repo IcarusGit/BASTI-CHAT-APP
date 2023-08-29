@@ -10,10 +10,15 @@
         })
     })
 
-    function chatUser(username){
+    function chatUser(username){ 
+        axios.post('http://localhost:3002/chat', {username: username}).then(res =>{
+            alert(res.data.message)
+        }) 
+           
         const router = useRouter(); 
-        router.replace(`/chat/${username}`); 
+        router.push(`/chat/${username}`); 
     }
+
 </script>
 
 <template>

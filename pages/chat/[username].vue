@@ -1,29 +1,36 @@
 <script setup>
+import axios from 'axios';
+
     const { username } = useRoute().params
 
     const messages_container = ref([])
 
+    onMounted(() => {
+        axios.get(`http://localhost:3002/chat/${username}`).then(res =>{
+            messages_container.value = res.data.messages
+        })
+    })
+
     const message = ref({
-        content: "",
-        sender_username: username
+        content: ""
     })
 
     const container = ref(null); // Reference to the chat container element
 
     async function sendMessage(){
-        messages_container.value.push({
-            content: message.value.content,
-            sender_username: message.value.sender_username
-        })
+        axios.post(`http://localhost:3002/chat/${username}`,{content: message.value.content}).then(res => {
+            console.log(res.data.messages)
+            messages_container.value = res.data.messages
 
-        message.value.content = ""
+            message.value.content = ""            
+        })   
 
         await nextTick();//Use await nextTick() before scrolling to ensure the DOM update is complete, await need an async function
-
+        //to scroll when messages are overflowing
         container.value.scrollTo({
             top: container.value.scrollHeight,
             behavior: 'smooth'
-        })
+        })     
     }
 </script>
 
