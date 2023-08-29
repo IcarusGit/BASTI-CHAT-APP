@@ -1,26 +1,14 @@
 <script setup>
-    const users_list = ref([
-        {
-            username: "sebastian",
-            password: "sebastian",
-            isActive: true
-        },
-        {
-            username: "Baste",
-            password: "Baste",
-            isActive: true
-        },
-        {
-            username: "zeb",
-            password: "zeb",
-            isActive: true
-        },
-        {
-            username: "huy",
-            password: "huy",
-            isActive: false
-        }
-    ])
+    import axios from 'axios';
+
+    const users_list = ref([])
+    let filteredUsers = ref([])
+    onMounted(() => {
+        axios.get('http://localhost:3002/chat').then(res => {
+            users_list.value.push(...res.data.users)
+            filteredUsers.value = users_list.value.filter(user => user.username !== res.data.currentlyLoggedIn);            
+        })
+    })
 
     function chatUser(username){
         const router = useRouter(); 
@@ -52,7 +40,7 @@
 
     
             <div class="border-white border h-4/5 overflow-auto">
-                <div @click="chatUser(user.username)" v-for="(user, userindex) in users_list" :key="userindex">
+                <div @click="chatUser(user.username)" v-for="(user, userindex) in filteredUsers" :key="userindex">
                     <button class="flex justify-between items-center w-full border border-white rounded h-10 bg-zinc-500 text-white text-lg text-center py-1 my-1">
                         <div class="flex items-center">
                             <!-- avatar -->
@@ -69,7 +57,7 @@
                         </div>
                         
                         <!-- active status -->
-                        <div :class="`${user.isActive ? 'bg-green-500': 'bg-red-500'}`" class="rounded-full w-6 h-6 mr-4">
+                        <div :class="`${user.status == 'Logged in' ? 'bg-green-500': 'bg-red-500'}`" class="rounded-full w-6 h-6 mr-4">
 
                         </div>
                     </button>                

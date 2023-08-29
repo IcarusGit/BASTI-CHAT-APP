@@ -1,29 +1,25 @@
 <script setup>
-    const users = ref([])
+    import axios from "axios"    
+    
     const adduser = ref({
         username: "", 
         password: ""
     })
 
     function register(){
-        const isExisting = users.value.some(user => user.username === adduser.value.username);
+        axios.post('http://localhost:3002/register', {username: adduser.value.username, password: adduser.value.password}).then(res => {
+            if (res.data.status === false){
+                alert("Username is already existing")
+                return false
+            }
 
-        if (isExisting) {
-            alert("Username is already existing!")
-            return false
-        }
-
-        users.value.push({
-            username: adduser.value.username,
-            password: adduser.value.password
+            alert(res.data.message)
+            adduser.value.username = ""
+            adduser.value.password = "" 
+            
+            const router = useRouter(); 
+            router.push('/login'); 
         })
-
-        alert("Registration successful!")
-        adduser.value.username = ""
-        adduser.value.password = "" 
-        
-        const router = useRouter(); 
-        router.push('/login'); 
     }
 </script>
 

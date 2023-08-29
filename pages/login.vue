@@ -1,12 +1,31 @@
 <script setup>
+    import axios from "axios"
+
     const user = ref({
         username: "",
         password: ""
     })
     
-    function login(){     
-        user.value.username = ""
-        user.value.password = ""     
+    function login(){  
+        axios.post('http://localhost:3002/login', {username: user.value.username, password: user.value.password}).then(res => {
+            //let destination;
+
+            if(res.data.status === false){
+                alert(res.data.message)
+
+                return false     
+            }
+
+
+            alert(res.data.message)
+            const router = useRouter(); // Get the router instance
+            router.push('/chat'); // Navigate to the login page
+
+
+
+            user.value.username = ""
+            user.value.password = "" 
+        })     
     } 
 </script>
 
