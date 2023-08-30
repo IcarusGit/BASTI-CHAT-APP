@@ -6,6 +6,20 @@
         password: ""
     })
 
+    let currentToken 
+    onMounted(() => {
+        currentToken = localStorage.getItem('token')
+        if( !currentToken ){
+            const router = useRouter();
+            router.replace('/');  
+        }
+
+        else{
+            const router = useRouter();
+            router.replace('/chat');    
+        }
+    })
+
     function register(){
         axios.post('http://localhost:3002/register', {username: adduser.value.username, password: adduser.value.password}).then(res => {
             if (res.data.status === false){

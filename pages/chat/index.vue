@@ -3,22 +3,60 @@
 
     const users_list = ref([])
     let filteredUsers = ref([])
+    let onlineUsers = ref([])
     onMounted(() => {
-        axios.get('http://localhost:3002/chat').then(res => {
+        //included the authentication here
+        axios.get('http://localhost:3002/chat', {
+            headers: {
+                Authorization: localStorage.getItem('token')
+            }
+        }).then(res => {
+            console.log("Token from localStorage:", localStorage.getItem('token'));
+            if(!localStorage.getItem('token')){
+                localStorage.clear()
+                const router = useRouter(); 
+                router.push('/login'); 
+            }  
+            
             users_list.value.push(...res.data.users)
             filteredUsers.value = users_list.value.filter(user => user.username !== res.data.currentlyLoggedIn);            
+            onlineUsers.value.push(res.data.onlineUsers)
         })
     })
 
     function chatUser(username){ 
-        axios.post('http://localhost:3002/chat', {username: username}).then(res =>{
+        axios.post('http://localhost:3002/chat',{talkingto: username},{
+            headers: {
+                Authorization: localStorage.getItem('token')
+            }
+        }).then(res =>{
             alert(res.data.message)
-        }) 
-           
-        const router = useRouter(); 
-        router.push(`/chat/${username}`); 
+            const router = useRouter(); 
+            router.push(`/chat/${username}`); 
+        })        
     }
 
+    function checkonlineusers(user){
+        if (onlineUsers.value.includes(user)){
+            return true
+        }
+
+        else{
+            return false
+        }
+    }
+
+    function logout(){
+        axios.post('http://localhost:3002/logout',{},{
+            headers: {
+                Authorization: localStorage.getItem('token')
+            }
+        }).then(res => {
+            localStorage.clear()
+            const router = useRouter(); 
+            router.push('/login'); 
+        })
+    }
 </script>
 
 <template>
@@ -31,7 +69,7 @@
             <div class="flex justify-between">
                 <div class="text-4xl text-white mb-4">MESSAGES</div>
                 
-                <button class="text-white bg-red-500 rounded-md h-11 w-20">Logout</button>
+                <button @click="logout" class="text-white bg-red-500 rounded-md h-11 w-20">Logout</button>
             </div>
             
             
@@ -63,7 +101,7 @@
                         </div>
                         
                         <!-- active status -->
-                        <div :class="`${user.status == 'Logged in' ? 'bg-green-500': 'bg-red-500'}`" class="rounded-full w-6 h-6 mr-4">
+                        <div :class="`${checkonlineusers(user.username) ? 'bg-green-500': 'bg-red-500'}`" class="rounded-full w-6 h-6 mr-4">
 
                         </div>
                     </button>                

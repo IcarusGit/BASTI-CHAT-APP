@@ -5,23 +5,35 @@
         username: "",
         password: ""
     })
+
+    let currentToken
+    onMounted(() => {
+        currentToken = localStorage.getItem('token')
+        if( !currentToken ){
+            const router = useRouter();
+            router.replace('/login');  
+        }
+
+        else{
+            const router = useRouter();
+            router.replace('/chat');    
+        }
+    })
     
     function login(){  
         axios.post('http://localhost:3002/login', {username: user.value.username, password: user.value.password}).then(res => {
-            //let destination;
-
             if(res.data.status === false){
                 alert(res.data.message)
 
                 return false     
             }
 
-
             alert(res.data.message)
+            localStorage.clear()
+            localStorage.setItem('token', res.data.token)
+           
             const router = useRouter(); // Get the router instance
             router.push('/chat'); // Navigate to the login page
-
-
 
             user.value.username = ""
             user.value.password = "" 

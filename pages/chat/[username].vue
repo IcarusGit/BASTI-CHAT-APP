@@ -5,42 +5,65 @@ import axios from 'axios';
 
     const messages_container = ref([])
 
-    onMounted(() => {
-        axios.get(`http://localhost:3002/chat/${username}`).then(res =>{
-            messages_container.value = res.data.messages
-        })
-    })
+    onMounted(() => {        
+        if (localStorage.getItem('token')) {
+            axios.get(`http://localhost:3002/chat/${username}`, {
+                headers: {
+                    Authorization: localStorage.getItem('token'),
+                }
+            }).then((res) => {
+                messages_container.value = res.data.messages;
+            });
+        } else {
+            localStorage.clear();
+            const router = useRouter();
+            router.push('/login');
+        }
+    });
 
-    const message = ref({
-        content: "",
-        sender: ""
-    })
+    const message = ref("")
 
     const container = ref(null); // Reference to the chat container element
 
     function sendMessage(){        
-        axios.post(`http://localhost:3002/chat/${username}`,{content: message.value.content}).then(async res => {
+        axios.post(`http://localhost:3002/chat/${username}`,{content: message.value},{
+            headers: {
+                Authorization: localStorage.getItem('token')
+            }
+        }).then(async res => {
             console.log(res.data.result)
             messages_container.value.push({
                 content: res.data.content,
                 sender: res.data.sender
-            })
-            //messages_container.value = res.data.messages       
+            })    
 
             await nextTick();//Use await nextTick() before scrolling to ensure the DOM update is complete, await need an async function
             //to scroll when messages are overflowing
             container.value.scrollTo({
                 top: container.value.scrollHeight,
                 behavior: 'smooth'
-            })           
-        })
-        message.value.content = ""   
-        message.value.sender = ""
+            })     
+            
+            message.value = ""
+        })        
     }
 
     function goBack(){
         const router = useRouter(); 
         router.push('/chat'); 
+    }
+
+    function logout(){
+        axios.post('http://localhost:3002/logout', {},{
+            headers: {
+                Authorization: localStorage.getItem('token')
+            }
+        }).then(res => {
+            localStorage.clear()
+            const router = useRouter(); 
+            router.push('/login'); 
+            
+        })
     }
 </script>
 
@@ -63,7 +86,7 @@ import axios from 'axios';
                         GO BACK
                     </button>
 
-                    <button class="text-white bg-red-500 rounded-md h-11 w-20">
+                    <button @click="logout" class="text-white bg-red-500 rounded-md h-11 w-20">
                         LOGOUT
                     </button>
                 </div>
@@ -71,9 +94,9 @@ import axios from 'axios';
             
             <!-- child -->
             <div class="flex flex-col border-white border h-5/6 overflow-auto my-4" ref="container">
-                <div v-for="(messages, index) in messages_container" :key="index" class="flex mx-4 my-2" :class="`${messages.sender_username == username ? 'justify-start' : 'justify-end'}`">
+                <div v-for="(messages, index) in messages_container" :key="index" class="flex mx-4 my-2" :class="`${messages.sender == username ? 'justify-start' : 'justify-end'}`">
                     <!-- container -->
-                    <div :class="`${messages.sender_username == username ? 'bg-zinc-500 text-white' : 'bg-white text-black'}`" class="rounded-lg px-2 h-auto max-w-[70%]">
+                    <div :class="`${messages.sender == username ? 'bg-zinc-500 text-white' : 'bg-white text-black'}`" class="rounded-lg px-2 h-auto max-w-[70%]">
                         <p class="break-words">
                             {{messages.content}}
                         </p>
@@ -83,7 +106,7 @@ import axios from 'axios';
             </div>    
 
             <form @submit.prevent="sendMessage">
-                <input v-model="message.content" type="text" id="text" placeholder="Say something" class="rounded-md border border-[#E6E6E6] h-11 w-full indent-3.5 focus:outline-none" required>
+                <input v-model="message" type="text" id="text" placeholder="Say something" class="rounded-md border border-[#E6E6E6] h-11 w-full indent-3.5 focus:outline-none" required>
                 <button type="submit"></button>
             </form>            
         </div>
