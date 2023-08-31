@@ -1,29 +1,51 @@
 <script setup>
-import axios from 'axios';
+    import axios from 'axios';
+    import { io } from "socket.io-client";
+    const socket = io("http://localhost:3002");
 
     const { username } = useRoute().params
 
     const messages_container = ref([])
 
-    onMounted(() => {        
-        if (localStorage.getItem('token')) {
-            axios.get(`http://localhost:3002/chat/${username}`, {
-                headers: {
-                    Authorization: localStorage.getItem('token'),
-                }
-            }).then((res) => {
-                messages_container.value = res.data.messages;
-            });
+    function scrollToBottom() {
+        container.value.scrollTo({
+            top: container.value.scrollHeight,
+            behavior: 'smooth'
+        }) 
+        //other way to scroll it
+        // if (container.value) {
+        //     container.value.scrollTop = container.value.scrollHeight;
+        // }
+    }
+
+    let currentToken
+    onMounted(() => {    
+        currentToken = localStorage.getItem('token')    
+        if (currentToken) {
+            fetchMessage()
+              
         } else {
             localStorage.clear();
             const router = useRouter();
             router.push('/login');
         }
-    });
+    }); 
 
     const message = ref("")
 
     const container = ref(null); // Reference to the chat container element
+
+    function fetchMessage(){
+        axios.get(`http://localhost:3002/chat/${username}`, {
+            headers: {
+                Authorization: localStorage.getItem('token'),
+            }
+        }).then(async (res) => {            
+            messages_container.value = res.data.messages 
+            await nextTick()
+            scrollToBottom()      
+        });
+    }
 
     function sendMessage(){        
         axios.post(`http://localhost:3002/chat/${username}`,{content: message.value},{
@@ -31,21 +53,20 @@ import axios from 'axios';
                 Authorization: localStorage.getItem('token')
             }
         }).then(async res => {
-            console.log(res.data.result)
-            messages_container.value.push({
-                content: res.data.content,
-                sender: res.data.sender
-            })    
+            socket.emit("chat",{
+                "content": res.data.content,
+                "sender": res.data.sender,
+                "receiver": username
+            })             
 
-            await nextTick();//Use await nextTick() before scrolling to ensure the DOM update is complete, await need an async function
-            //to scroll when messages are overflowing
-            container.value.scrollTo({
-                top: container.value.scrollHeight,
-                behavior: 'smooth'
-            })     
-            
-            message.value = ""
-        })        
+            await nextTick()
+            scrollToBottom()     
+        })  
+        socket.on("addChat", (data) => {
+            messages_container.value.push(data.convo)
+        })
+        
+        message.value = ""
     }
 
     function goBack(){
@@ -61,13 +82,13 @@ import axios from 'axios';
         }).then(res => {
             localStorage.clear()
             const router = useRouter(); 
-            router.push('/login'); 
-            
+            router.push('/login');             
         })
     }
 </script>
 
 <template>
+    <!-- opaque background -->
     <div class="relative w-screen h-screen top-0 bottom-0 left-0 right-0 bg-black opacity-80">
         
     </div>
@@ -99,14 +120,13 @@ import axios from 'axios';
                     <div :class="`${messages.sender == username ? 'bg-zinc-500 text-white' : 'bg-white text-black'}`" class="rounded-lg px-2 h-auto max-w-[70%]">
                         <p class="break-words">
                             {{messages.content}}
-                        </p>
-                        
+                        </p>                        
                     </div>                    
                 </div>                              
             </div>    
 
             <form @submit.prevent="sendMessage">
-                <input v-model="message" type="text" id="text" placeholder="Say something" class="rounded-md border border-[#E6E6E6] h-11 w-full indent-3.5 focus:outline-none" required>
+                <input v-model="message" type="text" id="text" placeholder="Say something" class="rounded-md border border-[#E6E6E6] h-11 w-full indent-3.5 focus:outline-none" autocomplete="off" required>
                 <button type="submit"></button>
             </form>            
         </div>

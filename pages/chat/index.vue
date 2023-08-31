@@ -1,27 +1,35 @@
 <script setup>
     import axios from 'axios';
+    import { io } from "socket.io-client";
+    const socket = io("http://localhost:3002");
 
     const users_list = ref([])
     let filteredUsers = ref([])
     let onlineUsers = ref([])
+
+    let currentToken
     onMounted(() => {
-        //included the authentication here
-        axios.get('http://localhost:3002/chat', {
-            headers: {
-                Authorization: localStorage.getItem('token')
-            }
-        }).then(res => {
-            console.log("Token from localStorage:", localStorage.getItem('token'));
-            if(!localStorage.getItem('token')){
-                localStorage.clear()
-                const router = useRouter(); 
-                router.push('/login'); 
-            }  
-            
-            users_list.value.push(...res.data.users)
-            filteredUsers.value = users_list.value.filter(user => user.username !== res.data.currentlyLoggedIn);            
-            onlineUsers.value.push(res.data.onlineUsers)
-        })
+        currentToken = localStorage.getItem('token')
+        //included the authentication here      
+
+        if (currentToken){
+            axios.get('http://localhost:3002/chat', {
+                headers: {
+                    Authorization: localStorage.getItem('token')
+                }
+            }).then(res => {         
+                users_list.value.push(...res.data.users)
+                filteredUsers.value = users_list.value.filter(user => user.username !== res.data.currentlyLoggedIn);                    
+                
+                socket.on("signin_update", (data) => {                    
+                    onlineUsers.value = data.onlineUsers
+                })
+            })
+        } else {            
+            localStorage.clear();
+            const router = useRouter();
+            router.push('/login');           
+        }
     })
 
     function chatUser(username){ 
@@ -29,8 +37,13 @@
             headers: {
                 Authorization: localStorage.getItem('token')
             }
-        }).then(res =>{
+        }).then(res => {
             alert(res.data.message)
+            // socket.emit("chat", {
+            //     "receiver": res.data.conversing[0],
+            //     "sender": res.data.conversing[1]
+            // })
+
             const router = useRouter(); 
             router.push(`/chat/${username}`); 
         })        
@@ -44,6 +57,25 @@
         else{
             return false
         }
+    }
+
+    const searchUser = ref("")
+    function search(){
+        axios.post('http://localhost:3002/chat', {talkingto: searchUser.value}, {
+            headers: {
+                Authorization: localStorage.getItem('token')
+            }
+        }).then( res => {
+            if (res.data.message){                
+                alert(res.data.message)
+                const router = useRouter(); 
+                router.push(`/chat/${searchUser.value}`);
+                searchUser.value = "" 
+            }            
+            else{
+                alert("No user found!")
+            }
+        })
     }
 
     function logout(){
@@ -67,15 +99,18 @@
     <div class="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
         <div class="p-10 w-[900px] h-[90vh] shadow rounded-lg overflow-hidden bg-green-500">
             <div class="flex justify-between">
-                <div class="text-4xl text-white mb-4">MESSAGES</div>
-                
-                <button @click="logout" class="text-white bg-red-500 rounded-md h-11 w-20">Logout</button>
+                <div class="text-4xl text-white mb-4">
+                    MESSAGES
+                </div>                
+                <button @click="logout" class="text-white bg-red-500 rounded-md h-11 w-20">
+                    Logout
+                </button>
             </div>
             
             
-            <form>
+            <form @submit.prevent="search">
                 <div class="relative overflow-hidden">
-                    <input type="text" placeholder="Search a friend" class="mb-4 rounded-md border border-[#E6E6E6] h-11 w-full indent-3.5 focus:outline-none">
+                    <input v-model="searchUser" type="text" placeholder="Search a friend" class="mb-4 rounded-md border border-[#E6E6E6] h-11 w-full indent-3.5 focus:outline-none">
                     <button type="submit" class="absolute right-0 top-0 text-xl h-11 bg-green-300 rounded-md px-3">
                         message
                     </button>                    

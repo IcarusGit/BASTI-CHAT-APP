@@ -1,5 +1,7 @@
 <script setup>
     import axios from "axios"
+    import { io } from "socket.io-client";
+    const socket = io("http://localhost:3002");
 
     const user = ref({
         username: "",
@@ -13,7 +15,6 @@
             const router = useRouter();
             router.replace('/login');  
         }
-
         else{
             const router = useRouter();
             router.replace('/chat');    
@@ -24,9 +25,10 @@
         axios.post('http://localhost:3002/login', {username: user.value.username, password: user.value.password}).then(res => {
             if(res.data.status === false){
                 alert(res.data.message)
-
                 return false     
             }
+
+            socket.emit("sign_in", {"username" : user.value.username})
 
             alert(res.data.message)
             localStorage.clear()
