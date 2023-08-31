@@ -39,11 +39,6 @@
             }
         }).then(res => {
             alert(res.data.message)
-            // socket.emit("chat", {
-            //     "receiver": res.data.conversing[0],
-            //     "sender": res.data.conversing[1]
-            // })
-
             const router = useRouter(); 
             router.push(`/chat/${username}`); 
         })        

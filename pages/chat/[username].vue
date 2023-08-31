@@ -12,18 +12,15 @@
             top: container.value.scrollHeight,
             behavior: 'smooth'
         }) 
-        //other way to scroll it
-        // if (container.value) {
-        //     container.value.scrollTop = container.value.scrollHeight;
-        // }
     }
 
     let currentToken
-    onMounted(() => {    
-        currentToken = localStorage.getItem('token')    
+    onMounted(async () => {    
+        currentToken = localStorage.getItem('token')
+
         if (currentToken) {
-            fetchMessage()
-              
+            messages_container.value = []
+            fetchMessage() 
         } else {
             localStorage.clear();
             const router = useRouter();
@@ -41,31 +38,32 @@
                 Authorization: localStorage.getItem('token'),
             }
         }).then(async (res) => {            
-            messages_container.value = res.data.messages 
+            messages_container.value = res.data.convo
             await nextTick()
             scrollToBottom()      
         });
     }
 
-    function sendMessage(){        
+    function sendMessage(){ 
         axios.post(`http://localhost:3002/chat/${username}`,{content: message.value},{
             headers: {
                 Authorization: localStorage.getItem('token')
             }
-        }).then(async res => {
+        }).then((res) => {  
             socket.emit("chat",{
                 "content": res.data.content,
                 "sender": res.data.sender,
-                "receiver": username
-            })             
-
-            await nextTick()
-            scrollToBottom()     
-        })  
-        socket.on("addChat", (data) => {
+                "receiver": username.toString()
+            })  
+        }) 
+         
+        socket.on("addChat",async (data) => {
             messages_container.value.push(data.convo)
-        })
+            await nextTick()
+            scrollToBottom()
+        })  
         
+
         message.value = ""
     }
 
