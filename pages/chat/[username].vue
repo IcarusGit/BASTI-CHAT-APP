@@ -3,10 +3,6 @@
     import { io } from "socket.io-client";
 
     const socket = io("http://localhost:3002");
-
-
-    
-
     const { username } = useRoute().params
 
     const messages_container = ref([])
@@ -57,14 +53,13 @@
             }
         }).then(async (res) => {            
             messages_container.value = res.data.convo.messages
+            socket.emit("join_room", {
+                sender: res.data.convo.conversing[1],
+                receiver: res.data.convo.conversing[0]
+            })
+
             await nextTick()
-            scrollToBottom()   
-            
-            // socket.emit("chat",{
-            //     content: "",
-            //     sender: res.data.convo.conversing[1],
-            //     receiver: username.toString()
-            // }) 
+            scrollToBottom()
         });
     }
 
@@ -78,7 +73,7 @@
                 content: res.data.content,
                 sender: res.data.sender,
                 receiver: username.toString()
-            }) 
+            })
             
             messages_container.value.push({
                 content: res.data.content,

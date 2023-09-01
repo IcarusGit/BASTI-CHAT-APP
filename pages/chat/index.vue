@@ -9,6 +9,8 @@
 
     socket.on("signin_update", (data) => {                    
         onlineUsers.value = data.onlineUsers
+
+        //filteredUsers.value = data.filteredUsers
         console.log(onlineUsers.value)
     })     
 
@@ -32,7 +34,10 @@
                 
                 console.log(onlineUsers)
 
-                socket.emit("sign_in", {username : res.data.currentlyLoggedIn})
+                socket.emit("sign_in", {
+                    username : res.data.currentlyLoggedIn
+                })
+
             })
         } else {            
             localStorage.clear();
