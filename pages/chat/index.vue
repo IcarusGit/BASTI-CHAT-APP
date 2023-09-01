@@ -11,12 +11,8 @@
         onlineUsers.value = data.onlineUsers
 
         //filteredUsers.value = data.filteredUsers
-        console.log(onlineUsers.value)
-    })     
-
-    // socket.on("allusers", (data) => {
-    //     filteredUsers.value = data.filteredUsers
-    // })
+        //console.log(onlineUsers.value)
+    }) 
 
     let currentToken
     onMounted(() => {
@@ -28,16 +24,22 @@
                 headers: {
                     Authorization: localStorage.getItem('token')
                 }
-            }).then(res => {         
+            }).then(res => { 
                 users_list.value.push(...res.data.users)
                 filteredUsers.value = users_list.value.filter(user => user.username !== res.data.currentlyLoggedIn); 
                 
-                console.log(onlineUsers)
-
+                //console.log(onlineUsers)
                 socket.emit("sign_in", {
                     username : res.data.currentlyLoggedIn
                 })
 
+                socket.on("allUsers", (data) => {
+                    users_list.value = data.mapregisteredUsers
+                    filteredUsers.value = users_list.value.filter(user => user.username !== res.data.currentlyLoggedIn); 
+               
+                    console.log(filteredUsers.value)
+                    // filteredUsers.value = data.filteredUsers
+                })
             })
         } else {            
             localStorage.clear();
@@ -145,8 +147,7 @@
                         </div>
                     </button>                
                 </div>
-            </div>
-            
+            </div>            
         </div>
     </div>
 </template>

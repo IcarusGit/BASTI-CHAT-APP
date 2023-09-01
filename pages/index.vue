@@ -29,7 +29,10 @@
                 return false
             }
 
-            // socket.emit("registered", {newUser: res.data.newuser})
+            socket.emit("registered", {
+                username: adduser.value.username,
+                password : adduser.value.password
+            })
 
             alert(res.data.message)
             adduser.value.username = ""
