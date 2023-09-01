@@ -1,21 +1,39 @@
 <script setup>
     import axios from 'axios';
     import { io } from "socket.io-client";
+
     const socket = io("http://localhost:3002");
+
+
+    
 
     const { username } = useRoute().params
 
     const messages_container = ref([])
 
     function scrollToBottom() {
-        container.value.scrollTo({
-            top: container.value.scrollHeight,
+        const container = document.querySelector("#container")
+        container.scrollTo({
+            top: container.scrollHeight,
             behavior: 'smooth'
         }) 
     }
 
+    // socket.emit("chat",{
+    //     content: messages_container.value,
+    //     sender: localStorage.getItem('token'),
+    //     receiver: username.toString()
+    // }) 
+
+    socket.on("addChat", async (data) => {
+        console.log("Received chat")
+        messages_container.value.push(data.convo)
+        await nextTick()
+        scrollToBottom()
+    })  
+
     let currentToken
-    onMounted(async () => {    
+    onMounted(() => {    
         currentToken = localStorage.getItem('token')
 
         if (currentToken) {
@@ -38,9 +56,15 @@
                 Authorization: localStorage.getItem('token'),
             }
         }).then(async (res) => {            
-            messages_container.value = res.data.convo
+            messages_container.value = res.data.convo.messages
             await nextTick()
-            scrollToBottom()      
+            scrollToBottom()   
+            
+            // socket.emit("chat",{
+            //     content: "",
+            //     sender: res.data.convo.conversing[1],
+            //     receiver: username.toString()
+            // }) 
         });
     }
 
@@ -49,21 +73,22 @@
             headers: {
                 Authorization: localStorage.getItem('token')
             }
-        }).then((res) => {  
+        }).then(async (res) => {  
             socket.emit("chat",{
-                "content": res.data.content,
-                "sender": res.data.sender,
-                "receiver": username.toString()
-            })  
-        }) 
-         
-        socket.on("addChat",async (data) => {
-            messages_container.value.push(data.convo)
-            await nextTick()
-            scrollToBottom()
-        })  
-        
+                content: res.data.content,
+                sender: res.data.sender,
+                receiver: username.toString()
+            }) 
+            
+            messages_container.value.push({
+                content: res.data.content,
+                sender: res.data.sender,
+                receiver: username.toString()
+            })
 
+            await nextTick()
+            scrollToBottom()     
+        })  
         message.value = ""
     }
 
@@ -78,6 +103,7 @@
                 Authorization: localStorage.getItem('token')
             }
         }).then(res => {
+            socket.emit("logout", {username: res.data.username})
             localStorage.clear()
             const router = useRouter(); 
             router.push('/login');             
@@ -112,7 +138,7 @@
             </div>
             
             <!-- child -->
-            <div class="flex flex-col border-white border h-5/6 overflow-auto my-4" ref="container">
+            <div class="flex flex-col border-white border h-5/6 overflow-auto my-4" id="container">
                 <div v-for="(messages, index) in messages_container" :key="index" class="flex mx-4 my-2" :class="`${messages.sender == username ? 'justify-start' : 'justify-end'}`">
                     <!-- container -->
                     <div :class="`${messages.sender == username ? 'bg-zinc-500 text-white' : 'bg-white text-black'}`" class="rounded-lg px-2 h-auto max-w-[70%]">

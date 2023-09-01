@@ -28,7 +28,7 @@
                 return false     
             }
 
-            socket.emit("sign_in", {"username" : user.value.username})
+            socket.emit("sign_in", {username : res.data.username})
 
             alert(res.data.message)
             localStorage.clear()

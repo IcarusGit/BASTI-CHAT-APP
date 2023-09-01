@@ -1,5 +1,7 @@
 <script setup>
-    import axios from "axios"    
+    import axios from "axios"
+    import { io } from "socket.io-client";
+    const socket = io("http://localhost:3002");   
     
     const adduser = ref({
         username: "", 
@@ -26,6 +28,8 @@
                 alert("Username is already existing")
                 return false
             }
+
+            // socket.emit("registered", {newUser: res.data.newuser})
 
             alert(res.data.message)
             adduser.value.username = ""

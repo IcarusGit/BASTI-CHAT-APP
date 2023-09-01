@@ -7,10 +7,19 @@
     let filteredUsers = ref([])
     let onlineUsers = ref([])
 
+    socket.on("signin_update", (data) => {                    
+        onlineUsers.value = data.onlineUsers
+        console.log(onlineUsers.value)
+    })     
+
+    // socket.on("allusers", (data) => {
+    //     filteredUsers.value = data.filteredUsers
+    // })
+
     let currentToken
     onMounted(() => {
         currentToken = localStorage.getItem('token')
-        //included the authentication here      
+        //included the authentication here     
 
         if (currentToken){
             axios.get('http://localhost:3002/chat', {
@@ -19,11 +28,11 @@
                 }
             }).then(res => {         
                 users_list.value.push(...res.data.users)
-                filteredUsers.value = users_list.value.filter(user => user.username !== res.data.currentlyLoggedIn);                    
+                filteredUsers.value = users_list.value.filter(user => user.username !== res.data.currentlyLoggedIn); 
                 
-                socket.on("signin_update", (data) => {                    
-                    onlineUsers.value = data.onlineUsers
-                })
+                console.log(onlineUsers)
+
+                socket.emit("sign_in", {username : res.data.currentlyLoggedIn})
             })
         } else {            
             localStorage.clear();
@@ -45,13 +54,7 @@
     }
 
     function checkonlineusers(user){
-        if (onlineUsers.value.includes(user)){
-            return true
-        }
-
-        else{
-            return false
-        }
+        return onlineUsers.value.includes(user)
     }
 
     const searchUser = ref("")
@@ -79,6 +82,7 @@
                 Authorization: localStorage.getItem('token')
             }
         }).then(res => {
+            socket.emit("logout", {username: res.data.username})
             localStorage.clear()
             const router = useRouter(); 
             router.push('/login'); 
