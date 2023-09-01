@@ -104,7 +104,7 @@
         <div class="p-10 w-[900px] h-[90vh] shadow rounded-lg overflow-hidden bg-green-500">
             <div class="flex justify-between">
                 <div class="text-4xl text-white mb-4">
-                    MESSAGES
+                    {{ }}MESSAGES
                 </div>                
                 <button @click="logout" class="text-white bg-red-500 rounded-md h-11 w-20">
                     Logout
