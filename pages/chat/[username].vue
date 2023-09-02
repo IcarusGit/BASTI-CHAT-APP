@@ -1,25 +1,20 @@
 <script setup>
     import axios from 'axios';
-    import { io } from "socket.io-client";
 
+    import { io } from "socket.io-client";
     const socket = io("http://localhost:3002");
+    
     const { username } = useRoute().params
 
     const messages_container = ref([])
 
-    function scrollToBottom() {
+    function scrollToBottom() {//the DOM can't read the ref syntax from vue so I just used query selector to not display any error
         const container = document.querySelector("#container")
         container.scrollTo({
             top: container.scrollHeight,
             behavior: 'smooth'
         }) 
     }
-
-    // socket.emit("chat",{
-    //     content: messages_container.value,
-    //     sender: localStorage.getItem('token'),
-    //     receiver: username.toString()
-    // }) 
 
     socket.on("addChat", async (data) => {
         console.log("Received chat")
@@ -42,10 +37,6 @@
         }
     }); 
 
-    const message = ref("")
-
-    const container = ref(null); // Reference to the chat container element
-
     function fetchMessage(){
         axios.get(`http://localhost:3002/chat/${username}`, {
             headers: {
@@ -63,6 +54,8 @@
         });
     }
 
+    const message = ref("")
+    
     function sendMessage(){ 
         axios.post(`http://localhost:3002/chat/${username}`,{content: message.value},{
             headers: {

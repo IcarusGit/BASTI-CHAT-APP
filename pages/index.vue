@@ -11,11 +11,10 @@
     let currentToken 
     onMounted(() => {
         currentToken = localStorage.getItem('token')
-        if( !currentToken ){
+        if (!currentToken){
             const router = useRouter();
             router.replace('/');  
         }
-
         else{
             const router = useRouter();
             router.replace('/chat');    

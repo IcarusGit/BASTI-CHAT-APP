@@ -9,15 +9,11 @@
 
     socket.on("signin_update", (data) => {                    
         onlineUsers.value = data.onlineUsers
-
-        //filteredUsers.value = data.filteredUsers
-        //console.log(onlineUsers.value)
     }) 
 
     let currentToken
     onMounted(() => {
         currentToken = localStorage.getItem('token')
-        //included the authentication here     
 
         if (currentToken){
             axios.get('http://localhost:3002/chat', {
@@ -27,8 +23,7 @@
             }).then(res => { 
                 users_list.value.push(...res.data.users)
                 filteredUsers.value = users_list.value.filter(user => user.username !== res.data.currentlyLoggedIn); 
-                
-                //console.log(onlineUsers)
+        
                 socket.emit("sign_in", {
                     username : res.data.currentlyLoggedIn
                 })
@@ -36,12 +31,10 @@
                 socket.on("allUsers", (data) => {
                     users_list.value = data.mapregisteredUsers
                     filteredUsers.value = users_list.value.filter(user => user.username !== res.data.currentlyLoggedIn); 
-               
-                    console.log(filteredUsers.value)
-                    // filteredUsers.value = data.filteredUsers
                 })
             })
-        } else {            
+        } 
+        else {            
             localStorage.clear();
             const router = useRouter();
             router.push('/login');           
@@ -106,7 +99,7 @@
         <div class="p-10 w-[900px] h-[90vh] shadow rounded-lg overflow-hidden bg-green-500">
             <div class="flex justify-between">
                 <div class="text-4xl text-white mb-4">
-                    {{ }}MESSAGES
+                    MESSAGES<!-- put the user's name here so I wont be confused -->
                 </div>                
                 <button @click="logout" class="text-white bg-red-500 rounded-md h-11 w-20">
                     Logout
