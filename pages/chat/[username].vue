@@ -67,12 +67,6 @@
                 sender: res.data.sender,
                 receiver: username.toString()
             })
-            
-            messages_container.value.push({
-                content: res.data.content,
-                sender: res.data.sender,
-                receiver: username.toString()
-            })
 
             await nextTick()
             scrollToBottom()     
