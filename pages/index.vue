@@ -1,7 +1,10 @@
 <script setup>
     import axios from "axios"
     import { io } from "socket.io-client";
-    const socket = io("http://localhost:3002");   
+import CheckOtp from "~/components/CheckOtp.vue";
+    const socket = io("http://localhost:3002");  
+    
+    let otpScreen = ref(false)
     
     const adduser = ref({
         username: "", 
@@ -32,6 +35,8 @@
                 username: adduser.value.username,
                 password : adduser.value.password
             })
+
+            otpScreen.value = true
 
             alert(res.data.message)
             adduser.value.username = ""
