@@ -12,15 +12,29 @@ import CheckOtp from "~/components/CheckOtp.vue";
     })
 
     let currentToken 
-    onMounted(() => {
-        currentToken = localStorage.getItem('token')
-        if (!currentToken){
+    onMounted(() => {        
+        currentToken = localStorage.getItem('token')       
+
+        if (currentToken) {
+            axios.get('http://localhost:3002/tokenCheck', {
+                headers: {
+                    Authorization: currentToken
+                }
+            }).then(res => {
+                if (res.data.message === "Valid Token"){
+                    const router = useRouter();
+                    router.push('/chat');
+                } else {
+                    localStorage.clear();
+                    const router = useRouter();
+                    router.push('/');
+                }                
+            })
+            
+        } else {
+            localStorage.clear();
             const router = useRouter();
-            router.replace('/');  
-        }
-        else{
-            const router = useRouter();
-            router.replace('/chat');    
+            router.push('/');
         }
     })
 

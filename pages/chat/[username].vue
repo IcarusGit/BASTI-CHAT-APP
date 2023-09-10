@@ -25,11 +25,24 @@
 
     let currentToken
     onMounted(() => {    
-        currentToken = localStorage.getItem('token')
+        currentToken = localStorage.getItem('token')       
 
         if (currentToken) {
-            messages_container.value = []
-            fetchMessage() 
+            axios.get('http://localhost:3002/tokenCheck', {
+                headers: {
+                    Authorization: currentToken
+                }
+            }).then(res => {
+                if (res.data.message === "Valid Token"){
+                    messages_container.value = []
+                    fetchMessage() 
+                } else {
+                    localStorage.clear();
+                    const router = useRouter();
+                    router.push('/login');
+                }                
+            })
+            
         } else {
             localStorage.clear();
             const router = useRouter();

@@ -18,20 +18,30 @@
         if (currentToken){
             axios.get('http://localhost:3002/chat', {
                 headers: {
-                    Authorization: localStorage.getItem('token')
+                    Authorization: currentToken
                 }
             }).then(res => { 
-                users_list.value.push(...res.data.users)
-                filteredUsers.value = users_list.value.filter(user => user.username !== res.data.currentlyLoggedIn); 
-        
-                socket.emit("sign_in", {
-                    username : res.data.currentlyLoggedIn
-                })
-
-                socket.on("allUsers", (data) => {
-                    users_list.value = data.mapregisteredUsers
+                if (res.data.message === "Valid Token"){
+                    users_list.value.push(...res.data.users)
                     filteredUsers.value = users_list.value.filter(user => user.username !== res.data.currentlyLoggedIn); 
-                })
+            
+                    socket.emit("sign_in", {
+                        username : res.data.currentlyLoggedIn
+                    })
+
+                    socket.on("allUsers", (data) => {
+                        users_list.value = data.mapregisteredUsers
+                        filteredUsers.value = users_list.value.filter(user => user.username !== res.data.currentlyLoggedIn); 
+                    })
+                }  
+                
+                else {
+                    localStorage.clear();
+                    const router = useRouter();
+                    router.push('/login');   
+                }
+
+                
             })
         } 
         else {            
@@ -134,7 +144,7 @@
                             </div>
                         </div>
                         
-                        <!-- active status -->
+                        <!-- active/inactive status -->
                         <div :class="`${checkonlineusers(user.username) ? 'bg-green-500': 'bg-red-500'}`" class="rounded-full w-6 h-6 mr-4">
 
                         </div>
