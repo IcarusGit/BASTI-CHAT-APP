@@ -10,17 +10,7 @@
 
     let currentToken
     onMounted(() => {
-        currentToken = localStorage.getItem('token')
-        if( !currentToken ){
-            const router = useRouter();
-            router.replace('/login');  
-        }
-        else{
-            const router = useRouter();
-            router.replace('/chat');    
-        }
-
-        currentToken = localStorage.getItem('token')       
+        currentToken = localStorage.getItem('token')     
 
         if (currentToken) {
             axios.get('http://localhost:3002/tokenCheck', {
@@ -28,10 +18,12 @@
                     Authorization: currentToken
                 }
             }).then(res => {
+                console.log(res.data.message)//Valid Token
                 if (res.data.message === "Valid Token"){
                     const router = useRouter();
                     router.push('/chat');
                 } else {
+                    console.log("token invalid")
                     localStorage.clear();
                     const router = useRouter();
                     router.push('/login');
@@ -39,6 +31,7 @@
             })
             
         } else {
+            console.log("No token")
             localStorage.clear();
             const router = useRouter();
             router.push('/login');

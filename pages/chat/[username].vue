@@ -37,6 +37,7 @@
                     messages_container.value = []
                     fetchMessage() 
                 } else {
+                    console.log("invalid Token")
                     localStorage.clear();
                     const router = useRouter();
                     router.push('/login');

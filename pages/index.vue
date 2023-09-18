@@ -1,7 +1,6 @@
 <script setup>
     import axios from "axios"
     import { io } from "socket.io-client";
-import CheckOtp from "~/components/CheckOtp.vue";
     const socket = io("http://localhost:3002");  
     
     let otpScreen = ref(false)

@@ -11,6 +11,10 @@
         onlineUsers.value = data.onlineUsers
     }) 
 
+    socket.on("disconnect_update", (data) => {
+        onlineUsers.value = data.onlineUsers
+    })
+
     let currentToken
     onMounted(() => {
         currentToken = localStorage.getItem('token')
@@ -25,7 +29,7 @@
                     users_list.value.push(...res.data.users)
                     filteredUsers.value = users_list.value.filter(user => user.username !== res.data.currentlyLoggedIn); 
             
-                    socket.emit("sign_in", {
+                    socket.emit("logging_in", {
                         username : res.data.currentlyLoggedIn
                     })
 
@@ -40,11 +44,10 @@
                     const router = useRouter();
                     router.push('/login');   
                 }
-
-                
             })
         } 
-        else {            
+        else {  
+            console.log("No token")          
             localStorage.clear();
             const router = useRouter();
             router.push('/login');           
