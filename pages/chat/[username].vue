@@ -7,6 +7,7 @@
     const { username } = useRoute().params
 
     const messages_container = ref([])
+    // let isMessageLoading = ref(false)
 
     function scrollToBottom() {//the DOM can't read the ref syntax from vue so I just used query selector to not display any error
         const container = document.querySelector("#container")
@@ -18,15 +19,23 @@
 
     socket.on("addChat", async (data) => {
         console.log("Received chat")
-        messages_container.value.push(data.convo)
+        const index = messages_container.value.findIndex((obj) => obj.content === data.convo.content && obj.sender === data.convo.sender && obj.isLoading == true);
+        // console.log(messages_container.value[index]) UNDEFINED SA OTHER USERS SHEMPRE SAYO MO LANG TO MAKIKITA
+        if (index !== -1){
+            messages_container.value[index]['isLoading'] = false
+        }else {         
+            messages_container.value.push(data.convo)   
+        }
+        //messages_container.value.push(data.convo)
+        //isMessageLoading.value = false
         await nextTick()
         scrollToBottom()
     })  
 
     let currentToken
+    let currentlyLoggedIn
     onMounted(() => {    
         currentToken = localStorage.getItem('token')       
-
         if (currentToken) {
             axios.get('http://localhost:3002/tokenCheck', {
                 headers: {
@@ -36,6 +45,7 @@
                 if (res.data.message === "Valid Token"){
                     messages_container.value = []
                     fetchMessage() 
+
                 } else {
                     console.log("invalid Token")
                     localStorage.clear();
@@ -70,20 +80,29 @@
 
     const message = ref("")
     
-    function sendMessage(){ 
+    async function sendMessage(){ 
+        currentlyLoggedIn = localStorage.getItem('currentlyLoggedIn')
+
+        messages_container.value.push({
+            content: message.value,
+            sender: currentlyLoggedIn,
+            isLoading: true
+        }) 
+
+        await nextTick()
+        scrollToBottom()            
         axios.post(`http://localhost:3002/chat/${username}`,{content: message.value},{
             headers: {
                 Authorization: localStorage.getItem('token')
             }
-        }).then(async (res) => {  
+        }).then(async (res) => { 
+            console.log("backend is done. now emiting to sockets")
             socket.emit("chat",{
                 content: res.data.content,
                 sender: res.data.sender,
                 receiver: username.toString()
             })
-
-            await nextTick()
-            scrollToBottom()     
+    
         })  
         message.value = ""
     }
@@ -135,11 +154,11 @@
             
             <!-- child -->
             <div class="flex flex-col border-white border h-5/6 overflow-auto my-4" id="container">
-                <div v-for="(messages, index) in messages_container" :key="index" class="flex mx-4 my-2" :class="`${messages.sender == username ? 'justify-start' : 'justify-end'}`">
+                <div v-for="(message, index) in messages_container" :key="index" class="flex mx-4 my-2" :class="`${message.sender == username ? 'justify-start' : 'justify-end'}`">
                     <!-- container -->
-                    <div :class="`${messages.sender == username ? 'bg-zinc-500 text-white' : 'bg-white text-black'}`" class="rounded-lg px-2 h-auto max-w-[70%]">
+                    <div :class="`${message['isLoading'] == true ? 'animate-pulse opacity-80' : ''} ${message.sender == username ? 'bg-zinc-500 text-white' : 'bg-white text-black'}`" class="rounded-lg px-2 h-auto max-w-[70%]">
                         <p class="break-words">
-                            {{messages.content}}
+                            {{message.content}}
                         </p>                        
                     </div>                    
                 </div>                              

@@ -50,6 +50,7 @@
             alert(res.data.message)
             localStorage.clear()
             localStorage.setItem('token', res.data.token)
+            localStorage.setItem('currentlyLoggedIn', res.data.username)
            
             const router = useRouter(); // Get the router instance
             router.push('/chat'); // Navigate to the login page
