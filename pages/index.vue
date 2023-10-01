@@ -59,8 +59,6 @@
             router.push('/login'); 
         })
     }
-
-    //trying some commit contributions
 </script>
 
 <template>
